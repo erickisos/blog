@@ -1,0 +1,7 @@
+#+title: Blog posts
+
+This repository stores all the basic notes that I'm using to write my personal blog posts, it is public so you can read it here directly.
+
+* Expectations (for the future)
+
+- [ ] Adding a custom pipeline to automatically publish the pages into a website.
