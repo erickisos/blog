@@ -26,7 +26,6 @@ fi
 mkdir -p "$OUTPUT_DIR"
 
 # Contador de archivos convertidos
-converted=0
 
 for file in "$INPUT_DIR"/*.org; do
     if [ -f "$file" ]; then
@@ -35,14 +34,5 @@ for file in "$INPUT_DIR"/*.org; do
         echo "🔄 Convirtiendo: $filename.org -> $filename.md"
         pandoc "$file" -f org -t gfm -o "$output_file"
         echo "Converted: $file -> build/${filename}.md"
-        ((converted++))
     fi
 done
-
-echo ""
-if [ $converted -eq 0 ]; then
-    echo "⚠️ No se encontraron archivos .org en $INPUT_DIR"
-    exit 1
-else
-    echo "✅ Convertidos $converted archivo(s) exitosamente"
-fi
