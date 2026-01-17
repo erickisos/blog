@@ -1,0 +1,13 @@
+#+title: Core Foundations: Desacoplando el dominio con Ports & Adapters
+#+subtitle: Sobre los principios básicos de arquitectura de software.
+#+date: [2025-12-23]
+#+author: Erick G. Islas Osuna
+
+#+begin_quote
+⚠️ Disclaimer: El presente texto nace a partir de mi experiencia al desarrollar proyectos, no pretende ser una verdad absoluta sobre cómo escribir aplicaciones y nace de las conversaciones que he tenido amigos que han enfrentado retos similares.
+#+end_quote
+
+* Antecedentes
+
+Hace un par de años, un par de amigos cercanos que se encontraban en búsqueda de oportunidades me contaron sobre su experiencia en entrevistas. En su explicación, ambos, de manera independiente me mencionaron el tema de _Arquitectura de software_ y en particular el reto que representaba algo como _Clean Code_, ya que históricamente les era ajeno en el sector en el que trabajaban (Sistemas embebidos) o simplemente parecía /algo puramente académico/.
+

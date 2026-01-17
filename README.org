@@ -2,6 +2,37 @@
 
 This repository stores all the basic notes that I'm using to write my personal blog posts, it is public so you can read it here directly.
 
+* Pipeline de Publicación
+** Local Execution
+
+*** Pipeline
+
+#+begin_src bash
+# 1. Convertir archivos .org a .md
+./scripts/build.sh
+
+# 2. Validar archivos Markdown con rumdl
+rumdl check build
+
+# 3. Publicar a Dev.to (requiere API key)
+export DEVTO_API_KEY='tu-api-key'
+./scripts/publish.sh
+#+end_src
+*** Scripts
+
+- =./scripts/build.sh [input_dir] [output_dir]= - Convert .org → .md
+- =./scripts/publish.sh [markdown_dir]= - Dev.to publishing
+  - Depends on the Env Var: =DEVTO_API_KEY=
+
+** Requirements
+
+- *Pandoc*: =brew install pandoc= (macOS) or =apt-get install pandoc= (Linux)
+- *rumdl*: =pip install rumdl=
+- *jq*: =brew install jq= (macOS) or =apt-get install jq= (Linux)
+- *API Key de Dev.to*: https://dev.to/settings/extensions
+
 * Expectations (for the future)
 
-- [ ] Adding a custom pipeline to automatically publish the pages into a website.
+- [X] Adding a custom pipeline to automatically publish the pages into a website.
+- [ ] Add frontmatter support for custom titles and tags
+- [ ] Detect and update existing articles instead of creating duplicates
