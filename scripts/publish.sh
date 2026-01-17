@@ -41,14 +41,22 @@ if [ ! -d "$MARKDOWN_DIR" ]; then
 fi
 
 published=0
+updated=0
 failed=0
+
+echo "🔍 Obteniendo lista de artículos existentes..."
+# Obtener todos los artículos del usuario (incluyendo borradores)
+existing_articles=$(curl -s -X GET "https://dev.to/api/articles/me/all?per_page=1000" \
+    -H "api-key: $DEVTO_API_KEY")
+
+echo ""
 
 # Publicar cada archivo markdown
 for file in "$MARKDOWN_DIR"/*.md; do
     if [ -f "$file" ]; then
         filename=$(basename "$file" .md)
 
-        echo "📤 Publicando: $filename"
+        echo "📤 Procesando: $filename"
 
         # Extraer metadatos del archivo (frontmatter YAML si existe)
         if grep -q "^---$" "$file"; then
@@ -80,6 +88,9 @@ for file in "$MARKDOWN_DIR"/*.md; do
         done
         tags_json="${tags_json%,}]" # Remover última coma y cerrar array
 
+        # Buscar si ya existe un artículo con este título
+        existing_id=$(echo "$existing_articles" | jq -r --arg title "$title" '.[] | select(.title == $title) | .id')
+
         # Crear payload JSON para dev.to API
         payload=$(jq -n \
             --arg content "$article_content" \
@@ -94,25 +105,50 @@ for file in "$MARKDOWN_DIR"/*.md; do
                 }
             }')
 
-        # Publicar a dev.to
-        response=$(curl -s -w "\n%{http_code}" -X POST "https://dev.to/api/articles" \
-            -H "Content-Type: application/json" \
-            -H "api-key: $DEVTO_API_KEY" \
-            -d "$payload")
+        if [ -n "$existing_id" ]; then
+            # Actualizar artículo existente
+            echo "   🔄 Artículo existente encontrado (ID: $existing_id), actualizando..."
+            response=$(curl -s -w "\n%{http_code}" -X PUT "https://dev.to/api/articles/$existing_id" \
+                -H "Content-Type: application/json" \
+                -H "api-key: $DEVTO_API_KEY" \
+                -d "$payload")
 
-        # Separar el código de estado HTTP de la respuesta
-        http_code=$(echo "$response" | tail -n1)
-        response_body=$(echo "$response" | sed '$d')
+            # Separar el código de estado HTTP de la respuesta
+            http_code=$(echo "$response" | tail -n1)
+            response_body=$(echo "$response" | sed '$d')
 
-        if [ "$http_code" -eq 201 ]; then
-            article_url=$(echo "$response_body" | jq -r '.url // "N/A"')
-            echo "   ✅ Publicado como borrador: $article_url"
-            echo "   📋 Tags: $tags_json"
-            ((published++))
+            if [ "$http_code" -eq 200 ]; then
+                article_url=$(echo "$response_body" | jq -r '.url // "N/A"')
+                echo "   ✅ Actualizado exitosamente: $article_url"
+                echo "   📋 Tags: $tags_json"
+                updated=$((updated + 1))
+            else
+                echo "   ❌ Error al actualizar (HTTP $http_code)"
+                echo "   Response: $response_body"
+                failed=$((failed + 1))
+            fi
         else
-            echo "   ❌ Error al publicar (HTTP $http_code)"
-            echo "   Response: $response_body"
-            ((failed++))
+            # Crear nuevo artículo
+            echo "   ➕ Creando nuevo artículo..."
+            response=$(curl -s -w "\n%{http_code}" -X POST "https://dev.to/api/articles" \
+                -H "Content-Type: application/json" \
+                -H "api-key: $DEVTO_API_KEY" \
+                -d "$payload")
+
+            # Separar el código de estado HTTP de la respuesta
+            http_code=$(echo "$response" | tail -n1)
+            response_body=$(echo "$response" | sed '$d')
+
+            if [ "$http_code" -eq 201 ]; then
+                article_url=$(echo "$response_body" | jq -r '.url // "N/A"')
+                echo "   ✅ Publicado como borrador: $article_url"
+                echo "   📋 Tags: $tags_json"
+                published=$((published + 1))
+            else
+                echo "   ❌ Error al publicar (HTTP $http_code)"
+                echo "   Response: $response_body"
+                failed=$((failed + 1))
+            fi
         fi
         echo ""
     fi
@@ -120,10 +156,11 @@ done
 
 echo ""
 echo "📊 Resumen:"
-echo "   ✅ Publicados: $published"
+echo "   ➕ Creados: $published"
+echo "   🔄 Actualizados: $updated"
 if [ $failed -gt 0 ]; then
     echo "   ❌ Fallidos: $failed"
     exit 1
 else
-    echo "   🎉 Todos los artículos publicados exitosamente"
+    echo "   🎉 Proceso completado exitosamente"
 fi
