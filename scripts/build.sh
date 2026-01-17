@@ -32,7 +32,7 @@ for file in "$INPUT_DIR"/*.org; do
         filename=$(basename "$file" .org)
         output_file="$OUTPUT_DIR/${filename}.md"
         echo "🔄 Convirtiendo: $filename.org -> $filename.md"
-        pandoc "$file" -f org -t gfm -o "$output_file"
+        pandoc "$file" -f org -t gfm --shift-heading-level-by=1 --standalone -o "$output_file"
         echo "Converted: $file -> build/${filename}.md"
     fi
 done

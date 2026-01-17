@@ -1,7 +1,7 @@
 #+title: Core Foundations: Desacoplando el dominio con Ports & Adapters
-#+subtitle: Sobre los principios básicos de arquitectura de software.
 #+date: [2025-12-23]
 #+author: Erick G. Islas Osuna
+#+keywords: softwareengineering, cleancode, foundations, python
 
 #+begin_quote
 ⚠️ Disclaimer: El presente texto nace a partir de mi experiencia al desarrollar proyectos, no pretende ser una verdad absoluta sobre cómo escribir aplicaciones y nace de las conversaciones que he tenido amigos que han enfrentado retos similares.
