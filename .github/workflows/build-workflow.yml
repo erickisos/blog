@@ -17,17 +17,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@13
+        with:
+          bb: latest
+
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc jq
+          sudo apt-get install -y pandoc
           pip install rumdl
+
       - name: Convert Org files to Markdown
-        run: ./scripts/build.sh
+        run: bb scripts/build.clj
+
       - name: Lint Markdown files
         run: rumdl check build
+
       - name: Publish to Dev.to
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
-        run: ./scripts/publish.sh
+        run: bb scripts/publish.clj
